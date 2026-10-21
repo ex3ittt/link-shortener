@@ -4,88 +4,133 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Короткие ссылки</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%231f3fd1'/%3E%3Cpath d='M4 8h8' stroke='%23ffd23f' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
   <style>
+    /* Cobalt field on top, white sheet below. The short code, set huge in
+       Unbounded, is the one loud thing on the page. */
     :root {
-      --bg: #f3f1ec; --card: #fffdf9; --ink: #1f1e1b; --muted: #75716a; --line: #e0dcd2; --accent: #2b4c7e; --bad: #b3492f;
+      --cobalt: #1f3fd1; --cobalt-deep: #172fa3; --on-cobalt: #ffffff; --on-cobalt-soft: #c9d3ff;
+      --paper: #ffffff; --ink: #0f1a3d; --muted: #5a6485; --line: #dde2ef; --signal: #ffd23f; --bad: #c0283e;
       color-scheme: light;
     }
     @media (prefers-color-scheme: dark) {
-      :root { --bg: #161615; --card: #1f1e1c; --ink: #ebe8e1; --muted: #9b978e; --line: #34332f; --accent: #8fb0e6; --bad: #e0815f; color-scheme: dark; }
+      :root { --cobalt: #1a2f9e; --cobalt-deep: #12227a; --paper: #0e1430; --ink: #e8ecff; --muted: #9aa5cc; --line: #232c55; color-scheme: dark; }
     }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif; }
-    main { max-width: 680px; margin: 0 auto; padding: 40px 16px 56px; }
-    h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
-    .muted { color: var(--muted); }
-    form { margin: 22px 0 8px; display: grid; gap: 10px; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.5 "Golos Text", system-ui, sans-serif; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    .field { background: var(--cobalt); color: var(--on-cobalt); padding: 56px 0 48px; }
+    h1 { font: 700 clamp(30px, 5vw, 46px)/1.05 "Unbounded", sans-serif; margin: 0; letter-spacing: -0.02em; }
+    .lead { color: var(--on-cobalt-soft); margin: 14px 0 0; max-width: 52ch; font-size: 17px; }
+
+    form { margin-top: 32px; display: grid; gap: 14px; }
     .url-row { display: flex; gap: 8px; }
-    .opts { display: flex; gap: 10px; flex-wrap: wrap; font-size: 14px; color: var(--muted); align-items: center; }
-    .opts label { display: flex; gap: 6px; align-items: center; }
-    input, select, button { font: inherit; color: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--card); padding: 9px 12px; min-width: 0; }
-    .opts input, .opts select { padding: 5px 8px; }
-    .url-row input { flex: 1; font-size: 16px; }
-    button { cursor: pointer; }
-    button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
-    button.small { padding: 3px 9px; font-size: 13px; }
-    button.text { border: 0; background: none; padding: 0; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
-    .error { color: var(--bad); min-height: 1.5em; margin: 0; font-size: 14px; }
-    .result { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 6px; }
-    .short { font: 600 22px ui-monospace, "SF Mono", Menlo, monospace; word-break: break-all; }
-    .result .row { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-    h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 36px 0 8px; }
-    ul { list-style: none; padding: 0; margin: 0; }
-    .link { border-bottom: 1px solid var(--line); padding: 12px 0; }
-    .link-head { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; }
-    .code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
-    .target { grid-column: 1; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .count { font-variant-numeric: tabular-nums; text-align: right; }
-    .details { margin-top: 10px; display: grid; gap: 10px; font-size: 13.5px; }
-    .bars { display: flex; align-items: flex-end; gap: 2px; height: 48px; border-bottom: 1px solid var(--line); }
-    .bars span { flex: 1; background: var(--accent); opacity: .85; min-height: 1px; border-radius: 1px 1px 0 0; }
+    .url-row input { flex: 1; font-size: 18px; padding: 14px 16px; border: 0; border-radius: 10px; background: var(--on-cobalt); color: #0f1a3d; min-width: 0; }
+    .url-row input::placeholder { color: #8a93b3; }
+    button { font: inherit; cursor: pointer; border-radius: 10px; min-height: 44px; }
+    .go { border: 0; background: var(--signal); color: #0f1a3d; font: 600 17px "Golos Text", sans-serif; padding: 0 22px; }
+    .go:hover { background: #ffdd66; }
+    .go:active { translate: 0 1px; }
+    .opts { display: flex; gap: 10px 24px; flex-wrap: wrap; color: var(--on-cobalt-soft); font-size: 15px; }
+    .opts label { display: flex; gap: 8px; align-items: center; }
+    .opts input, .opts select { font: inherit; color: var(--on-cobalt); background: var(--cobalt-deep); border: 1px solid #3a57e0; border-radius: 8px; padding: 6px 10px; min-height: 38px; }
+    .opts input::placeholder { color: #8fa0f0; }
+    :focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; }
+    .error { margin: 12px 0 0; min-height: 1.5em; color: var(--signal); font-weight: 500; }
+
+    .result { margin-top: 28px; padding-top: 24px; border-top: 1px solid #4762e6; }
+    .from { color: var(--on-cobalt-soft); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: line-through; text-decoration-color: #7d90f0; }
+    .short { display: block; font: 700 clamp(30px, 7vw, 64px)/1.05 "Unbounded", sans-serif; letter-spacing: -0.03em; margin: 10px 0 18px; overflow-wrap: anywhere; color: var(--on-cobalt); text-decoration: none; }
+    .short .host { display: block; color: var(--on-cobalt-soft); font-weight: 400; font-size: 0.4em; letter-spacing: 0; margin-bottom: 4px; }
+    .result-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+    .copy { border: 2px solid var(--on-cobalt); background: none; color: var(--on-cobalt); padding: 0 18px; font-weight: 600; }
+    .copy:hover { background: var(--on-cobalt); color: var(--cobalt); }
+    .key-note { color: var(--on-cobalt-soft); font-size: 14px; margin: 0; max-width: 46ch; }
+
+    main.sheet { padding: 44px 0 56px; }
+    h2 { font: 600 22px/1.2 "Unbounded", sans-serif; margin: 0 0 18px; letter-spacing: -0.01em; }
+    .empty { color: var(--muted); }
+    ul { list-style: none; margin: 0; padding: 0; }
+    .link { border-top: 1px solid var(--line); padding: 16px 0; }
+    .link:last-child { border-bottom: 1px solid var(--line); }
+    .link-head { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; align-items: baseline; }
+    .code { font: 500 17px "Unbounded", sans-serif; letter-spacing: -0.01em; }
+    .target { color: var(--muted); font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .count { text-align: right; font-variant-numeric: tabular-nums; }
+    .count b { font: 600 20px "Unbounded", sans-serif; }
+    .more { border: 0; background: none; padding: 0; min-height: 32px; color: var(--cobalt); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; justify-self: end; }
+    @media (prefers-color-scheme: dark) { .more { color: #9fb0ff; } }
+    .details { margin-top: 14px; display: grid; gap: 16px; font-size: 15px; }
+    .bars { display: flex; align-items: flex-end; gap: 3px; height: 64px; border-bottom: 2px solid var(--ink); }
+    .bars span { flex: 1; background: var(--cobalt); min-height: 2px; }
     .bars span.zero { background: var(--line); }
-    .split { display: flex; gap: 28px; flex-wrap: wrap; }
-    .split div b { font-weight: 600; }
-    footer { margin-top: 40px; font-size: 13px; }
-    a { color: var(--accent); }
+    .bars-axis { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-top: 4px; }
+    .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; }
+    .split h3 { font-size: 14px; font-weight: 500; color: var(--muted); margin: 0 0 4px; }
+    .split p { margin: 0; display: flex; justify-content: space-between; gap: 8px; }
+    .split p b { font-variant-numeric: tabular-nums; }
+    .danger { border: 1px solid var(--line); background: none; color: var(--bad); padding: 0 14px; min-height: 38px; justify-self: start; }
+    @media (prefers-color-scheme: dark) { .danger { color: #ff8a9b; } }
+    footer { color: var(--muted); font-size: 14px; padding-bottom: 40px; }
+    a { color: inherit; }
+    @media (max-width: 560px) {
+      .wrap { padding: 0 16px; }
+      .field { padding: 36px 0 32px; }
+      .url-row { flex-direction: column; }
+      .go { min-height: 52px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .go:active { translate: none; } }
   </style>
 </head>
 <body>
-<main>
-  <h1>Короткие ссылки</h1>
-  <p class="muted">Длинный адрес превращается в короткий, а переходы по нему считаются: сколько, откуда и с чего открывали.</p>
+<header class="field">
+  <div class="wrap">
+    <h1>Короткие ссылки</h1>
+    <p class="lead">Вставь длинный адрес — получишь короткий. Потом видно, сколько раз по нему перешли, откуда и с какого устройства.</p>
 
-  <form id="form">
-    <div class="url-row">
-      <input id="url" placeholder="https://donstu.ru/abitur/priem/…" required autocomplete="off" aria-label="Длинная ссылка" />
-      <button class="primary">Сократить</button>
-    </div>
-    <div class="opts">
-      <label>свой адрес <input id="alias" placeholder="необязательно" size="14" /></label>
-      <label>живёт
-        <select id="expires">
-          <option value="">всегда</option>
-          <option value="1">сутки</option>
-          <option value="7">неделю</option>
-          <option value="30">месяц</option>
-        </select>
-      </label>
-    </div>
-  </form>
-  <p class="error" id="error"></p>
+    <form id="form">
+      <div class="url-row">
+        <input id="url" placeholder="donstu.ru/abitur/priem/..." required autocomplete="off" inputmode="url" aria-label="Длинная ссылка" />
+        <button class="go">Сократить</button>
+      </div>
+      <div class="opts">
+        <label>Свой адрес <input id="alias" placeholder="например, abitur" size="16" /></label>
+        <label>Работает
+          <select id="expires">
+            <option value="">без срока</option>
+            <option value="1">сутки</option>
+            <option value="7">неделю</option>
+            <option value="30">месяц</option>
+          </select>
+        </label>
+      </div>
+    </form>
+    <p class="error" id="error" role="alert"></p>
 
-  <div id="result" hidden class="result">
-    <div class="row">
-      <span class="short" id="short"></span>
-      <button class="small" id="copy">Скопировать</button>
+    <div id="result" class="result" hidden>
+      <div class="from" id="from"></div>
+      <a class="short" id="short" target="_blank" rel="noopener"></a>
+      <div class="result-row">
+        <button class="copy" id="copy">Скопировать</button>
+        <p class="key-note">Ключ управления сохранён в этом браузере. Без него статистику не посмотреть и ссылку не удалить.</p>
+      </div>
     </div>
-    <p class="muted" style="margin:8px 0 0;font-size:13px">Ключ управления сохранён в этом браузере — без него статистику не увидеть и ссылку не удалить.</p>
   </div>
+</header>
 
-  <h2 id="mine-title" hidden>Мои ссылки</h2>
-  <ul id="mine"></ul>
-
-  <footer class="muted">API с документацией — <a href="/docs">/docs</a>.</footer>
+<main class="sheet">
+  <div class="wrap">
+    <h2>Мои ссылки</h2>
+    <p class="empty" id="empty">Здесь появятся ссылки, которые ты сократишь в этом браузере.</p>
+    <ul id="mine"></ul>
+  </div>
 </main>
+
+<footer class="wrap">Есть API с документацией: <a href="/docs">/docs</a>.</footer>
 
 <script>
   const KEY = 'my-links'
@@ -107,7 +152,10 @@
       $('error').textContent = typeof data.detail === 'string' ? data.detail : 'Проверь поля'
       return
     }
-    $('short').textContent = data.short_url
+    const [, host, code] = data.short_url.match(/^https?:\/\/([^/]+\/)(.*)$/) || [, '', data.short_url]
+    $('short').innerHTML = `<span class="host">${esc(host)}</span>${esc(code)}`
+    $('short').href = data.short_url
+    $('from').textContent = data.url
     $('result').hidden = false
     save([{ code: data.code, short: data.short_url, url: data.url, token: data.manage_token }, ...load()])
     $('url').value = ''
@@ -116,7 +164,7 @@
   })
 
   $('copy').addEventListener('click', async () => {
-    await navigator.clipboard.writeText($('short').textContent)
+    await navigator.clipboard.writeText($('short').href)
     $('copy').textContent = 'Скопировано'
     setTimeout(() => ($('copy').textContent = 'Скопировать'), 1500)
   })
@@ -128,7 +176,7 @@
 
   async function render() {
     const list = load()
-    $('mine-title').hidden = list.length === 0
+    $('empty').hidden = list.length > 0
     $('mine').innerHTML = ''
     for (const link of list) {
       const li = document.createElement('li')
@@ -136,35 +184,41 @@
       li.innerHTML = `
         <div class="link-head">
           <span class="code">${esc(link.short.replace(/^https?:\/\//, ''))}</span>
-          <span class="count muted">…</span>
+          <span class="count"><b>…</b></span>
           <span class="target">${esc(link.url)}</span>
-          <button class="text">подробнее</button>
+          <button class="more" aria-expanded="false">Статистика</button>
         </div>`
       $('mine').append(li)
       const s = await stats(link)
       const count = li.querySelector('.count')
-      if (!s) { count.textContent = 'удалена'; continue }
-      count.textContent = `${s.clicks_by_people} ${plural(s.clicks_by_people, 'переход', 'перехода', 'переходов')}`
-      li.querySelector('button').addEventListener('click', () => toggle(li, link, s))
+      if (!s) { count.textContent = 'ссылка удалена'; li.querySelector('.more').remove(); continue }
+      count.innerHTML = `<b>${s.clicks_by_people}</b> ${plural(s.clicks_by_people, 'переход', 'перехода', 'переходов')}`
+      li.querySelector('.more').addEventListener('click', (e) => toggle(li, link, s, e.currentTarget))
     }
   }
 
-  function toggle(li, link, s) {
+  function toggle(li, link, s, button) {
     const open = li.querySelector('.details')
+    button.setAttribute('aria-expanded', String(!open))
     if (open) { open.remove(); return }
     const max = Math.max(1, ...s.last_30_days.map((d) => d.clicks))
     const bots = s.clicks_total - s.clicks_by_people
     const div = document.createElement('div')
     div.className = 'details'
+    const row = (name, n) => `<p><span>${esc(name)}</span><b>${n}</b></p>`
+    const people = s.devices.filter((d) => d.name !== 'bot')
     div.innerHTML = `
-      <div class="bars" title="Переходы за 30 дней">${s.last_30_days.map((d) =>
-        `<span class="${d.clicks ? '' : 'zero'}" style="height:${(d.clicks / max) * 100}%" title="${d.day}: ${d.clicks}"></span>`).join('')}</div>
-      <div class="split">
-        <div><span class="muted">Откуда</span><br>${s.referrers.map((r) => `${esc(r.name)} <b>${r.clicks}</b>`).join('<br>') || '—'}</div>
-        <div><span class="muted">Устройства</span><br>${s.devices.filter((d) => d.name !== 'bot').map((d) => `${d.name === 'mobile' ? 'телефон' : 'компьютер'} <b>${d.clicks}</b>`).join('<br>') || '—'}</div>
-        ${bots ? `<div><span class="muted">Превью в мессенджерах</span><br><b>${bots}</b></div>` : ''}
+      <div>
+        <div class="bars" role="img" aria-label="Переходы за 30 дней">${s.last_30_days.map((d) =>
+          `<span class="${d.clicks ? '' : 'zero'}" style="height:${(d.clicks / max) * 100}%" title="${d.day}: ${d.clicks}"></span>`).join('')}</div>
+        <div class="bars-axis"><span>30 дней назад</span><span>сегодня</span></div>
       </div>
-      <div><button class="small" data-delete>Удалить ссылку</button></div>`
+      <div class="split">
+        <div><h3>Откуда пришли</h3>${s.referrers.map((r) => row(r.name, r.clicks)).join('') || '<p>пока никто</p>'}</div>
+        <div><h3>Устройство</h3>${people.map((d) => row(d.name === 'mobile' ? 'телефон' : 'компьютер', d.clicks)).join('') || '<p>пока никто</p>'}</div>
+        ${bots ? `<div><h3>Превью в мессенджерах</h3>${row('не считаются как люди', bots)}</div>` : ''}
+      </div>
+      <button class="danger" data-delete>Удалить ссылку</button>`
     div.querySelector('[data-delete]').addEventListener('click', async () => {
       if (!confirm('Удалить? Короткий адрес перестанет работать.')) return
       await fetch(`/api/links/${link.code}`, { method: 'DELETE', headers: { 'x-manage-token': link.token } })
