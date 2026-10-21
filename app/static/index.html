@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Короткие ссылки</title>
+  <style>
+    :root {
+      --bg: #f3f1ec; --card: #fffdf9; --ink: #1f1e1b; --muted: #75716a; --line: #e0dcd2; --accent: #2b4c7e; --bad: #b3492f;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #161615; --card: #1f1e1c; --ink: #ebe8e1; --muted: #9b978e; --line: #34332f; --accent: #8fb0e6; --bad: #e0815f; color-scheme: dark; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    main { max-width: 680px; margin: 0 auto; padding: 40px 16px 56px; }
+    h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+    .muted { color: var(--muted); }
+    form { margin: 22px 0 8px; display: grid; gap: 10px; }
+    .url-row { display: flex; gap: 8px; }
+    .opts { display: flex; gap: 10px; flex-wrap: wrap; font-size: 14px; color: var(--muted); align-items: center; }
+    .opts label { display: flex; gap: 6px; align-items: center; }
+    input, select, button { font: inherit; color: inherit; border: 1px solid var(--line); border-radius: 8px; background: var(--card); padding: 9px 12px; min-width: 0; }
+    .opts input, .opts select { padding: 5px 8px; }
+    .url-row input { flex: 1; font-size: 16px; }
+    button { cursor: pointer; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+    button.small { padding: 3px 9px; font-size: 13px; }
+    button.text { border: 0; background: none; padding: 0; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+    .error { color: var(--bad); min-height: 1.5em; margin: 0; font-size: 14px; }
+    .result { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 6px; }
+    .short { font: 600 22px ui-monospace, "SF Mono", Menlo, monospace; word-break: break-all; }
+    .result .row { display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 36px 0 8px; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    .link { border-bottom: 1px solid var(--line); padding: 12px 0; }
+    .link-head { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; }
+    .code { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+    .target { grid-column: 1; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .count { font-variant-numeric: tabular-nums; text-align: right; }
+    .details { margin-top: 10px; display: grid; gap: 10px; font-size: 13.5px; }
+    .bars { display: flex; align-items: flex-end; gap: 2px; height: 48px; border-bottom: 1px solid var(--line); }
+    .bars span { flex: 1; background: var(--accent); opacity: .85; min-height: 1px; border-radius: 1px 1px 0 0; }
+    .bars span.zero { background: var(--line); }
+    .split { display: flex; gap: 28px; flex-wrap: wrap; }
+    .split div b { font-weight: 600; }
+    footer { margin-top: 40px; font-size: 13px; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Короткие ссылки</h1>
+  <p class="muted">Длинный адрес превращается в короткий, а переходы по нему считаются: сколько, откуда и с чего открывали.</p>
+
+  <form id="form">
+    <div class="url-row">
+      <input id="url" placeholder="https://donstu.ru/abitur/priem/…" required autocomplete="off" aria-label="Длинная ссылка" />
+      <button class="primary">Сократить</button>
+    </div>
+    <div class="opts">
+      <label>свой адрес <input id="alias" placeholder="необязательно" size="14" /></label>
+      <label>живёт
+        <select id="expires">
+          <option value="">всегда</option>
+          <option value="1">сутки</option>
+          <option value="7">неделю</option>
+          <option value="30">месяц</option>
+        </select>
+      </label>
+    </div>
+  </form>
+  <p class="error" id="error"></p>
+
+  <div id="result" hidden class="result">
+    <div class="row">
+      <span class="short" id="short"></span>
+      <button class="small" id="copy">Скопировать</button>
+    </div>
+    <p class="muted" style="margin:8px 0 0;font-size:13px">Ключ управления сохранён в этом браузере — без него статистику не увидеть и ссылку не удалить.</p>
+  </div>
+
+  <h2 id="mine-title" hidden>Мои ссылки</h2>
+  <ul id="mine"></ul>
+
+  <footer class="muted">API с документацией — <a href="/docs">/docs</a>.</footer>
+</main>
+
+<script>
+  const KEY = 'my-links'
+  const $ = (id) => document.getElementById(id)
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || [] } catch { return [] } }
+  const save = (list) => { try { localStorage.setItem(KEY, JSON.stringify(list)) } catch {} }
+  const plural = (n, a, b, c) => { const m = n % 10, h = n % 100; return m === 1 && h !== 11 ? a : m >= 2 && m <= 4 && (h < 12 || h > 14) ? b : c }
+  const esc = (s) => s.replace(/[&<>"]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]))
+
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault()
+    $('error').textContent = ''
+    const body = { url: $('url').value }
+    if ($('alias').value.trim()) body.alias = $('alias').value.trim()
+    if ($('expires').value) body.expires_in_days = Number($('expires').value)
+    const r = await fetch('/api/links', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+    const data = await r.json()
+    if (!r.ok) {
+      $('error').textContent = typeof data.detail === 'string' ? data.detail : 'Проверь поля'
+      return
+    }
+    $('short').textContent = data.short_url
+    $('result').hidden = false
+    save([{ code: data.code, short: data.short_url, url: data.url, token: data.manage_token }, ...load()])
+    $('url').value = ''
+    $('alias').value = ''
+    render()
+  })
+
+  $('copy').addEventListener('click', async () => {
+    await navigator.clipboard.writeText($('short').textContent)
+    $('copy').textContent = 'Скопировано'
+    setTimeout(() => ($('copy').textContent = 'Скопировать'), 1500)
+  })
+
+  async function stats(link) {
+    const r = await fetch(`/api/links/${link.code}/stats`, { headers: { 'x-manage-token': link.token } })
+    return r.ok ? r.json() : null
+  }
+
+  async function render() {
+    const list = load()
+    $('mine-title').hidden = list.length === 0
+    $('mine').innerHTML = ''
+    for (const link of list) {
+      const li = document.createElement('li')
+      li.className = 'link'
+      li.innerHTML = `
+        <div class="link-head">
+          <span class="code">${esc(link.short.replace(/^https?:\/\//, ''))}</span>
+          <span class="count muted">…</span>
+          <span class="target">${esc(link.url)}</span>
+          <button class="text">подробнее</button>
+        </div>`
+      $('mine').append(li)
+      const s = await stats(link)
+      const count = li.querySelector('.count')
+      if (!s) { count.textContent = 'удалена'; continue }
+      count.textContent = `${s.clicks_by_people} ${plural(s.clicks_by_people, 'переход', 'перехода', 'переходов')}`
+      li.querySelector('button').addEventListener('click', () => toggle(li, link, s))
+    }
+  }
+
+  function toggle(li, link, s) {
+    const open = li.querySelector('.details')
+    if (open) { open.remove(); return }
+    const max = Math.max(1, ...s.last_30_days.map((d) => d.clicks))
+    const bots = s.clicks_total - s.clicks_by_people
+    const div = document.createElement('div')
+    div.className = 'details'
+    div.innerHTML = `
+      <div class="bars" title="Переходы за 30 дней">${s.last_30_days.map((d) =>
+        `<span class="${d.clicks ? '' : 'zero'}" style="height:${(d.clicks / max) * 100}%" title="${d.day}: ${d.clicks}"></span>`).join('')}</div>
+      <div class="split">
+        <div><span class="muted">Откуда</span><br>${s.referrers.map((r) => `${esc(r.name)} <b>${r.clicks}</b>`).join('<br>') || '—'}</div>
+        <div><span class="muted">Устройства</span><br>${s.devices.filter((d) => d.name !== 'bot').map((d) => `${d.name === 'mobile' ? 'телефон' : 'компьютер'} <b>${d.clicks}</b>`).join('<br>') || '—'}</div>
+        ${bots ? `<div><span class="muted">Превью в мессенджерах</span><br><b>${bots}</b></div>` : ''}
+      </div>
+      <div><button class="small" data-delete>Удалить ссылку</button></div>`
+    div.querySelector('[data-delete]').addEventListener('click', async () => {
+      if (!confirm('Удалить? Короткий адрес перестанет работать.')) return
+      await fetch(`/api/links/${link.code}`, { method: 'DELETE', headers: { 'x-manage-token': link.token } })
+      save(load().filter((l) => l.code !== link.code))
+      render()
+    })
+    li.append(div)
+  }
+
+  render()
+</script>
+</body>
+</html>

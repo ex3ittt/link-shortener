@@ -1,0 +1,7 @@
+fastapi==0.157.0
+uvicorn[standard]==0.54.0
+SQLAlchemy[asyncio]==2.1.5
+asyncpg==0.32.0
+aiosqlite==0.22.1
+redis==8.1.0
+pydantic-settings==2.16.1
